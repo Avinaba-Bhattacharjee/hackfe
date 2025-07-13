@@ -1,55 +1,58 @@
 import React from 'react';
-import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { IoSearchOutline, IoNotificationsOutline, IoPersonCircleOutline } from 'react-icons/io5';
-import tw from 'twrnc'; // Tailwind CSS for React Native
-interface HeaderProps {
-  title: string;
-}
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { usePathname, useRouter } from 'expo-router';
+import tw from 'twrnc';
 
+const CENTER_TABS = [
+  { title: 'Show Patients', path: '/patientslist' },
+  { title: 'Show Trials', path: '/triallist' },
+  { title: 'Patient Form', path: '/patientdetails' },
+  { title: 'Trial Form', path: '/trialdetails' },
+  { title: 'Matched Patients', path: '/patient_match' },
+];
 
+const Header: React.FC = () => {
+  const router = useRouter();
+  const pathname = usePathname();
 
-const Header: React.FC<HeaderProps>  = () => {
+  const NavButton = ({ title, path }: { title: string; path: string }) => {
+    const isActive = pathname === path;
+    return (
+      <TouchableOpacity onPress={() => router.push(path as any)}>
+        <Text
+          style={tw.style(
+            'text-base font-semibold mx-2',
+            isActive ? 'text-blue-700 underline' : 'text-gray-600'
+          )}
+        >
+          {title}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <View style={tw`flex-row items-center justify-between bg-white p-4 shadow`}>
-      
-      {/* Logo */}
-      <Image
-        source={{ uri: 'https://your-logo-url.com/logo.png' }} // replace with your logo
-        style={tw`w-10 h-10`}
-        resizeMode="contain"
-      />
-
-      {/* Tabs */}
-      <View style={tw`flex-row space-x-4 ml-4`}>
-        {['Home', 'About', 'Services', 'Contact'].map((tab, index) => (
-          <TouchableOpacity key={index}>
-            <Text style={tw`text-base text-gray-800 font-semibold`}>{tab}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      {/* Right side: Search + Icons */}
-      <View style={tw`flex-row items-center space-x-4`}>
-        
-        {/* Search Bar */}
-        <View style={tw`flex-row items-center border border-gray-300 rounded-full px-3 py-1`}>
-          <IoSearchOutline size={16} color="#888" />
-          <TextInput
-            placeholder="Search"
-            style={tw`ml-2 w-24 text-sm text-gray-700`}
-            placeholderTextColor="#888"
+    <View style={tw`bg-white py-4 px-3 border-b border-gray-200`}>
+      <View style={tw`flex-row justify-between items-center`}>
+        {/* Left: Logo (Clickable) */}
+        <TouchableOpacity
+          style={tw`flex-row items-center`}
+          onPress={() => router.push('/')}
+        >
+          <Image
+            source={require('../assets/images/trialmatch.png')}
+            style={tw`w-8 h-8 mr-2`}
+            resizeMode="contain"
           />
+          <Text style={tw`text-lg font-bold text-gray-800`}>Trial Match</Text>
+        </TouchableOpacity>
+
+        {/* Center: Navigation Tabs */}
+        <View style={tw`flex-row items-center`}>
+          {CENTER_TABS.map((tab) => (
+            <NavButton key={tab.path} title={tab.title} path={tab.path} />
+          ))}
         </View>
-
-        {/* Notification Icon */}
-        <TouchableOpacity>
-          <IoNotificationsOutline size={24} color="#333" />
-        </TouchableOpacity>
-
-        {/* User Icon */}
-        <TouchableOpacity>
-          <IoPersonCircleOutline size={26} color="#333" />
-        </TouchableOpacity>
       </View>
     </View>
   );

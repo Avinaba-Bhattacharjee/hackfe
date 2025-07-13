@@ -1,23 +1,26 @@
-// app/tabs/_layout.tsx
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
+import { View } from 'react-native';
+import Header from '../../components/Header';
+import tw from 'twrnc';
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: Platform.select({
-          ios: { position: 'absolute' },
-          default: {},
-        }),
-      }}
-    >
-      <Tabs.Screen name="patientslist" options={{ title: 'Show Patients' }} />
-      <Tabs.Screen name="triallist" options={{ title: 'Show Trials' }} />
-      <Tabs.Screen name="patientdetails" options={{ title: 'Patient Form' }} />
-      <Tabs.Screen name="trialdetails" options={{ title: 'Trial Form' }} />
-      <Tabs.Screen name="patient_match" options={{ title: 'Matched Patients' }} />
-    </Tabs>
+    <View style={tw`flex-1 bg-white`}>
+      <Header />
+      <View style={tw`flex-1`}>
+        <Tabs
+          screenOptions={{
+            headerShown: false,
+          }}
+          tabBar={() => null} // Hide default tab bar
+        >
+          <Tabs.Screen name="patientslist" />
+          <Tabs.Screen name="triallist" />
+          <Tabs.Screen name="patientdetails" />
+          <Tabs.Screen name="trialdetails" />
+          <Tabs.Screen name="patient_match" />
+        </Tabs>
+      </View>
+    </View>
   );
 }

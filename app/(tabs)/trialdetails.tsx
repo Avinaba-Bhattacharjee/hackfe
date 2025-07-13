@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { Platform } from 'react-native';
 import { View, Text, TextInput, Switch, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import tw from 'twrnc'; // twrnc import
 import { Picker } from '@react-native-picker/picker'; // For dropdowns
+import axios from 'axios';
+
 
 // You might need to install this package:
 // npm install @react-native-picker/picker
@@ -25,58 +29,59 @@ const CreateTrialForm = () => {
   const [status, setStatus] = useState('Recruiting'); // Default value
   const [startDate, setStartDate] = useState(''); // YYYY-MM-DD format
   const [endDate, setEndDate] = useState('');   // YYYY-MM-DD format
+  const [showStartPicker, setShowStartPicker] = useState(false);
+const [showEndPicker, setShowEndPicker] = useState(false);
+
 
   // Function to handle form submission
-  const handleSubmit = () => {
-    // Basic validation (you can add more robust validation)
-    if (!trialName || !sponsor || !minAge || !maxAge || !location || !startDate || !endDate) {
-      Alert.alert('Validation Error', 'Please fill in all required fields (Trial Name, Sponsor, Min/Max Age, Location, Start/End Date).');
-      return;
-    }
+const handleSubmit = async () => {
+  if (!trialName || !sponsor || !minAge || !maxAge || !location || !startDate || !endDate) {
+    Alert.alert(
+      'Validation Error',
+      'Please fill in all required fields (Trial Name, Sponsor, Min/Max Age, Location, Start/End Date).'
+    );
+    return;
+  }
 
-    const formData = {
-      trial_name: trialName,
-      sponsor: sponsor,
-      min_age: parseInt(minAge), // Convert to integer
-      max_age: parseInt(maxAge), // Convert to integer
-      gender_requirement: genderRequirement,
-      min_symptom_duration: minSymptomDuration ? parseInt(minSymptomDuration) : null, // Optional integer
-      requires_muscle_weakness: requiresMuscleWeakness,
-      requires_twitching: requiresTwitching,
-      requires_positive_biomarker: requiresPositiveBiomarker,
-      requires_abnormal_emg: requiresAbnormalEmg,
-      allowed_treatments: allowedTreatments,
-      exclusion_previous_diagnosis: exclusionPreviousDiagnosis,
-      location: location,
-      status: status,
-      start_date: startDate,
-      end_date: endDate,
-    };
-
-    console.log('Form Data Submitted:', formData);
-    Alert.alert('Form Submitted', 'Check console for form data!');
-
-    // In a real application, you would send this formData to your API:
-    // try {
-    //   const response = await fetch('YOUR_API_ENDPOINT/createTrial', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(formData),
-    //   });
-    //   const result = await response.json();
-    //   if (response.ok) {
-    //     Alert.alert('Success', 'Trial created successfully!');
-    //     // Optionally reset form fields here
-    //   } else {
-    //     Alert.alert('Error', result.message || 'Failed to create trial.');
-    //   }
-    // } catch (error) {
-    //   console.error('API Error:', error);
-    //   Alert.alert('Error', 'Network error or server issue.');
-    // }
+  const formData = {
+    trial_name: trialName,
+    sponsor: sponsor,
+    min_age: parseInt(minAge),
+    max_age: parseInt(maxAge),
+    gender_requirement: genderRequirement,
+    min_symptom_duration: minSymptomDuration ? parseInt(minSymptomDuration) : null,
+    requires_muscle_weakness: requiresMuscleWeakness,
+    requires_twitching: requiresTwitching,
+    requires_positive_biomarker: requiresPositiveBiomarker,
+    requires_abnormal_emg: requiresAbnormalEmg,
+    allowed_treatments: allowedTreatments,
+    exclusion_previous_diagnosis: exclusionPreviousDiagnosis,
+    location: location,
+    status: status,
+    start_date: startDate,
+    end_date: endDate,
   };
+
+  try {
+    const response = await axios.post('http://localhost:3000/api/trials', formData);
+
+    if (response.status === 201 || response.status === 200) {
+      Alert.alert('Success', 'Trial created successfully!');
+      console.log('Response:', response.data);
+      // Optionally reset form fields here
+    } else {
+      Alert.alert('Error', 'Failed to create trial.');
+    }
+  } catch (error) {
+    console.error('API Error:', error);
+    if (axios.isAxiosError(error) && error.response) {
+      Alert.alert('Error', error.response.data?.message || 'Server responded with an error.');
+    } else {
+      Alert.alert('Error', 'Network error or server not reachable.');
+    }
+  }
+};
+
 
   return (
     <ScrollView style={tw`flex-1 bg-gray-100 p-4`}>
